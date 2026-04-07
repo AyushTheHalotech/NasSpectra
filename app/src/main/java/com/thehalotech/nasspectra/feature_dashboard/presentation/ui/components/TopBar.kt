@@ -1,15 +1,12 @@
 package com.thehalotech.nasspectra.feature_dashboard.presentation.ui.components
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -19,16 +16,13 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.thehalotech.nasspectra.NasState
-import com.thehalotech.nasspectra.PulseDot
 import com.thehalotech.nasspectra.core.ui.theme.Accent
 import com.thehalotech.nasspectra.core.ui.theme.AccentSoft
 import com.thehalotech.nasspectra.core.ui.theme.Surface0
 import com.thehalotech.nasspectra.core.ui.theme.TextSecondary
-import com.thehalotech.nasspectra.core.ui.theme.Warning
 
 @Composable
-fun TopBar() {
+fun TopBar(uptime: String) {
     Box(
         Modifier
             .fillMaxWidth()
@@ -65,7 +59,7 @@ fun TopBar() {
             ) {
                 PulseDot(color = Accent)
                 Text(
-                    "ONLINE  2d 12h",
+                    text = uptime,
                     color = AccentSoft,
                     fontSize = 11.sp,
                     fontWeight = FontWeight.Medium,

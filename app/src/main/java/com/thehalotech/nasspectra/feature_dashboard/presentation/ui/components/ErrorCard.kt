@@ -16,11 +16,12 @@ import androidx.compose.ui.unit.dp
 
 @Composable
 fun ErrorCard(
+    modifier: Modifier = Modifier,
     title: String,
     message: String,
     onRetry: () -> Unit
 ) {
-    StatCard {
+    StatCard(modifier = modifier) {
         Column(
             modifier = Modifier
                 .fillMaxWidth()

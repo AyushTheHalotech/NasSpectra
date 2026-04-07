@@ -21,9 +21,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.thehalotech.nasspectra.ArcGauge
-import com.thehalotech.nasspectra.ObsidianCard
-import com.thehalotech.nasspectra.Sparkline
 import com.thehalotech.nasspectra.core.ui.theme.TextPrimary
 import com.thehalotech.nasspectra.core.ui.theme.TextSecondary
 
@@ -31,7 +28,7 @@ import com.thehalotech.nasspectra.core.ui.theme.TextSecondary
 fun GaugeCard(
     modifier: Modifier = Modifier,
     label: String,
-    icon: androidx.compose.ui.graphics.vector.ImageVector,
+    icon: @Composable () -> Unit,
     value: Float,
     unit: String,
     accentColor: Color,
@@ -52,7 +49,7 @@ fun GaugeCard(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Text(label, color = TextSecondary, fontSize = 11.sp, letterSpacing = 2.sp, fontWeight = FontWeight.Medium)
-                Icon(icon, null, tint = accentColor.copy(alpha = .7f), modifier = Modifier.size(16.dp))
+                icon()
             }
             Spacer(Modifier.height(16.dp))
             TrackGauge(animValue / 100f, accentColor, Modifier.size(110.dp))
@@ -63,10 +60,6 @@ fun GaugeCard(
                 fontSize = 22.sp,
                 fontWeight = FontWeight.SemiBold
             )
-            if (sparkline != null) {
-                Spacer(Modifier.height(10.dp))
-                Sparkline(sparkline, accentColor, Modifier.fillMaxWidth().height(28.dp))
-            }
         }
     }
 }

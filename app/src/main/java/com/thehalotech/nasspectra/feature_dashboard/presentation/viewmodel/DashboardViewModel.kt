@@ -1,161 +1,221 @@
 package com.thehalotech.nasspectra.feature_dashboard.presentation.viewmodel
 
-import android.util.Log
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.setValue
+
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.thehalotech.nasspectra.feature_dashboard.domain.usecase.FetchReportingDataUseCase
 import com.thehalotech.nasspectra.feature_dashboard.domain.util.Result
 import com.thehalotech.nasspectra.feature_dashboard.domain.usecase.GetNetworkStateUseCase
-import com.thehalotech.nasspectra.feature_dashboard.domain.usecase.GetSystemStatsUseCase
-import com.thehalotech.nasspectra.feature_dashboard.domain.util.DomainError
+import com.thehalotech.nasspectra.feature_dashboard.domain.usecase.GetPoolStateUseCase
+import com.thehalotech.nasspectra.feature_dashboard.domain.usecase.ObserveDiskStatesUseCase
 import com.thehalotech.nasspectra.feature_dashboard.presentation.state.DashboardState
-import com.thehalotech.nasspectra.feature_dashboard.presentation.state.SectionState
-import com.thehalotech.nasspectra.feature_dashboard.presentation.ui.utils.toUiMessage
+import com.thehalotech.nasspectra.feature_dashboard.presentation.ui.utils.toError
+import com.thehalotech.nasspectra.feature_dashboard.presentation.ui.utils.toLoading
 import dagger.hilt.android.lifecycle.HiltViewModel
 import jakarta.inject.Inject
-import kotlinx.coroutines.Job
-import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.coroutineScope
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.isActive
-
 @HiltViewModel
 class DashboardViewModel @Inject constructor(
-    private val getSystemStats: GetSystemStatsUseCase,
-    private val getNetworkState: GetNetworkStateUseCase
+    private val getNetworkState: GetNetworkStateUseCase,
+    private val getPoolState: GetPoolStateUseCase,
+    private val reportingUseCase: FetchReportingDataUseCase,
+    private val observeDiskStatesUseCase: ObserveDiskStatesUseCase
 ): ViewModel() {
 
     private val _state = MutableStateFlow(DashboardState())
     val state: StateFlow<DashboardState> = _state
 
-    private var systemJob: Job? = null
-    private var networkJob: Job? = null
+    init {
+        loadReportingData()
+        observeDisks()
+        observeNetwork()
+        observePoolState()
+    }
 
-    fun loadSystemStats() {
+    fun observePoolState() {
         viewModelScope.launch {
             _state.update {
                 it.copy(
-                    system = it.system.copy(
-                        isRefreshing = it.system.data != null,
-                        isLoading = it.system.data == null))
+                    pools = it.pools.copy(
+                        isRefreshing = it.pools.data != null,
+                        isLoading = it.pools.data == null))
             }
+            getPoolState.flow.collect { result ->
+                when (result) {
+                    is Result.Success -> {
+                        _state.update {
+                            it.copy(
+                                pools = it.pools.copy(
+                                    data = result.data,
+                                    isLoading = false,
+                                    isRefreshing = false,
+                                    error = null
+                                )
+                            )
+                        }
 
-            when (val result = getSystemStats()) {
-                is Result.Success -> {
-                    _state.update {
-                        it.copy(
-                            system = it.system.copy(
-                                data = result.data,
-                                isLoading = false,
-                                isRefreshing = false,
-                                error = null
-                            )
-                        )
                     }
-                }
-                is Result.Error -> {
-                    _state.update {
-                        it.copy(
-                            system = it.system.copy(
-                                isLoading = false,
-                                isRefreshing = false,
-                                error = result.error
+                    is Result.Error -> {
+                        _state.update {
+                            it.copy(
+                                pools = it.pools.copy(
+                                    isLoading = false,
+                                    isRefreshing = false,
+                                    error = result.error
+                                )
                             )
-                        )
+                        }
                     }
                 }
             }
         }
     }
 
-    fun loadNetworkStats() {
+    fun observeNetwork() {
         viewModelScope.launch {
             _state.update {
                 it.copy(
                     network = it.network.copy(
                         isRefreshing = it.network.data != null,
-                        isLoading = it.network.data == null))
+                        isLoading = it.network.data == null)
+                )
             }
-            when (val result = getNetworkState()) {
-                is Result.Success -> {
-                    _state.update {
-                        it.copy(
-                            network = it.network.copy(
-                                data = result.data,
-                                isLoading = false,
-                                isRefreshing = false,
-                                error = null
+            getNetworkState.flow.collect { result ->
+                when (result) {
+                    is Result.Success -> {
+                        _state.update {
+                            it.copy(
+                                network = it.network.copy(
+                                    data = result.data,
+                                    isLoading = false,
+                                    isRefreshing = false,
+                                    error = null
+                                )
                             )
-                        )
+                        }
+
+                    }
+                    is Result.Error -> {
+                        _state.update {
+                            it.copy(
+                                network = it.network.copy(
+                                    isLoading = false,
+                                    isRefreshing = false,
+                                    error = result.error
+                                )
+                            )
+                        }
                     }
                 }
-                is Result.Error -> {
-                    _state.update {
-                        it.copy(
-                            network = it.network.copy(
-                                isLoading = false,
-                                isRefreshing = false,
-                                error = result.error
+            }
+        }
+    }
+
+    fun observeDisks() {
+        viewModelScope.launch {
+            _state.update {
+                it.copy(
+                    tempSection = it.tempSection.copy(
+                        diskTempState = it.tempSection.diskTempState.toLoading()
+                    )
+                )
+            }
+            observeDiskStatesUseCase.flow.collect { result ->
+                when (result) {
+                    is Result.Success -> {
+                        val data = result.data
+                        _state.update {
+                            it.copy(
+                                tempSection = it.tempSection.copy(
+                                    diskTempState = it.tempSection.diskTempState.copy(
+                                        data = data,
+                                        isLoading = false,
+                                        isRefreshing = false,
+                                        error = null
+                                    )
+                                )
                             )
-                        )
+                        }
+                    }
+                    is Result.Error -> {
+                        _state.update {
+                            it.copy(
+                                tempSection = it.tempSection.copy(
+                                    diskTempState = it.tempSection.diskTempState.toError(result.error)
+                                )
+                            )
+                        }
+                    }
+                }
+
+            }
+        }
+    }
+
+    fun loadReportingData() {
+        viewModelScope.launch {
+            _state.update {
+                it.copy(
+                    statSection = it.statSection.copy(
+                        cpuUsage = it.statSection.cpuUsage.toLoading(),
+                        memUsage = it.statSection.memUsage.toLoading()
+                    ),
+                    tempSection = it.tempSection.copy(
+                        cpuTempState = it.tempSection.cpuTempState.toLoading()
+                    )
+                )
+            }
+            reportingUseCase.flow.collect { result ->
+                when(result) {
+                    is Result.Success -> {
+                        val data = result.data
+                        _state.update {
+                            it.copy(
+                                statSection = it.statSection.copy(
+                                    cpuUsage = it.statSection.cpuUsage.copy(
+                                        data = data.cpuUsage,
+                                        isLoading = false,
+                                        isRefreshing = false,
+                                        error = null
+                                    ),
+                                    memUsage = it.statSection.memUsage.copy(
+                                        data = data.memUsage,
+                                        isLoading = false,
+                                        isRefreshing = false,
+                                        error = null
+                                    )
+                                ),
+                                tempSection = it.tempSection.copy(
+                                    cpuTempState = it.tempSection.cpuTempState.copy(
+                                        data = data.cpuTemp,
+                                        isLoading = false,
+                                        isRefreshing = false,
+                                        error = null
+                                    )
+                                )
+                            )
+                        }
+                    }
+                    is Result.Error -> {
+                        _state.update {
+                            it.copy(
+                                statSection = it.statSection.copy(
+                                    cpuUsage = it.statSection.cpuUsage.toError(result.error),
+                                    memUsage = it.statSection.memUsage.toError(result.error)
+                                ),
+                                tempSection = it.tempSection.copy(
+                                    cpuTempState = it.tempSection.cpuTempState.toError(result.error)
+                                )
+                            )
+                        }
                     }
                 }
             }
         }
+
     }
 
-    fun startSystemPolling() {
-        if(systemJob?.isActive == true) return
-
-        systemJob = viewModelScope.launch {
-            while(isActive) {
-                loadSystemStats()
-                delay(3000)
-            }
-        }
-    }
-
-    fun startNetworkPolling() {
-        if(networkJob?.isActive == true) return
-
-        networkJob = viewModelScope.launch {
-            while(isActive) {
-                loadNetworkStats()
-                delay(1000000)
-            }
-        }
-    }
-
-    fun startPolling() {
-        startSystemPolling()
-        startNetworkPolling()
-    }
-
-    fun stopPolling() {
-        systemJob?.cancel()
-        networkJob?.cancel()
-    }
-
-
-    fun <T> Result<T>.getOrNull(): T? =
-        (this as? Result.Success)?.data
-
-
-    private fun mergeErrors(
-        system: Result<*>,
-        network: Result<*>
-    ): String? {
-        val errors = listOfNotNull(
-            (system as? Result.Error)?.error?.toUiMessage(),
-            (network as? Result.Error)?.error?.toUiMessage()
-        )
-
-        return if (errors.isNotEmpty()) errors.joinToString("\n") else null
-    }
 }

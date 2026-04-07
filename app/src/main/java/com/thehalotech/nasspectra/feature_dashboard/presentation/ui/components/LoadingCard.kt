@@ -8,17 +8,18 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import com.thehalotech.nasspectra.core.ui.theme.TextSecondary
 
 @Composable
-fun LoadingCard(text: String) {
-    StatCard {
+fun LoadingCard(text: String, modifier: Modifier = Modifier) {
+    StatCard(modifier = modifier) {
         Box(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(24.dp),
             contentAlignment = Alignment.Center
         ) {
-            Text(text)
+            Text(text, color = TextSecondary)
         }
     }
 }

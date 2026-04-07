@@ -24,7 +24,6 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.thehalotech.nasspectra.ObsidianCard
 import com.thehalotech.nasspectra.core.ui.theme.Accent
 import com.thehalotech.nasspectra.core.ui.theme.Critical
 import com.thehalotech.nasspectra.core.ui.theme.Surface2

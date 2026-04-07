@@ -17,42 +17,39 @@ import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.LocalLifecycleOwner
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.thehalotech.nasspectra.core.ui.theme.Surface0
 import com.thehalotech.nasspectra.feature_dashboard.presentation.state.DashboardState
+import com.thehalotech.nasspectra.feature_dashboard.presentation.ui.appscreen.AppScreen
 import com.thehalotech.nasspectra.feature_dashboard.presentation.ui.components.KineticBottomNav
 import com.thehalotech.nasspectra.feature_dashboard.presentation.ui.components.TopBar
 import com.thehalotech.nasspectra.feature_dashboard.presentation.ui.dashboard.DashboardScreen
+import com.thehalotech.nasspectra.feature_dashboard.presentation.ui.storage.StorageScreen
 import com.thehalotech.nasspectra.feature_dashboard.presentation.viewmodel.DashboardViewModel
+import com.thehalotech.nasspectra.feature_dashboard.presentation.viewmodel.MainViewModel
 
 @Preview
 @Composable
-fun MainScreen(viewModel: DashboardViewModel = hiltViewModel()) {
+fun MainScreen(viewModel: MainViewModel = hiltViewModel()) {
 
-    val state by viewModel.state.collectAsState()
-    var selectedTab by remember { mutableIntStateOf(0) }
-
-    val lifecycleOwner = LocalLifecycleOwner.current
-
-    DisposableEffect(lifecycleOwner.lifecycle) {
-        val observer = LifecycleEventObserver { _, event ->
-            when (event) {
-                Lifecycle.Event.ON_START -> viewModel.startPolling()
-                Lifecycle.Event.ON_STOP -> viewModel.stopPolling()
-                else -> Unit
-            }
-        }
-
-        lifecycleOwner.lifecycle.addObserver(observer)
-
-        onDispose {
-            lifecycleOwner.lifecycle.removeObserver(observer)
+    val state by viewModel.state.collectAsStateWithLifecycle()
+    var uptime = ""
+    when {
+        state.systemState.isLoading -> {}
+        state.systemState.error != null -> {viewModel.loadSystemStats()}
+        state.systemState.data != null -> {
+            val data = state.systemState.data
+            val uptimeHours = data?.uptimeHours
+            val uptimeDays = data?.uptimeDays
+            uptime = "$uptimeDays Days $uptimeHours Hours"
         }
     }
+    var selectedTab by remember { mutableIntStateOf(0) }
 
     Scaffold(
         containerColor = Surface0,
         bottomBar = { KineticBottomNav(selectedTab, { selectedTab = it }) },
-        topBar = { TopBar() }
+        topBar = { TopBar(uptime = uptime) }
 
     ) { padding ->
         Box(
@@ -60,7 +57,12 @@ fun MainScreen(viewModel: DashboardViewModel = hiltViewModel()) {
                 .padding(padding)
                 .background(color = Surface0)
         ) {
-            DashboardScreen(state, onRetrySystem = {viewModel.loadSystemStats()}, onRetryNetwork = {viewModel.loadNetworkStats()})
+            when (selectedTab) {
+                0 -> DashboardScreen()
+                1 -> StorageScreen()
+                2 -> AppScreen()
+            }
+
         }
 
     }
