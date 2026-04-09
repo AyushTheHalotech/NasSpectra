@@ -53,7 +53,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.lifecycle.viewmodel.compose.viewModel
 import com.thehalotech.nasspectra.core.ui.theme.Critical
 import com.thehalotech.nasspectra.core.ui.theme.GreenNeon
 import com.thehalotech.nasspectra.core.ui.theme.LandingBackground
@@ -254,10 +253,12 @@ fun LandingTerminalCard(
                 }
 
                 Spacer(Modifier.height(16.dp))
+                val isApiKeyValid = state.apiKey.isNotBlank() && !hasInvalidApiKeyChars(state.apiKey)
+                val isIpValid = isValidIP(state.ip)
 
                 OutlinedButton(
                     onClick = onTestConnection,
-                    enabled = isValidIP(state.ip) && state.apiKey.isNotBlank(),
+                    enabled = isApiKeyValid && isIpValid,
                     modifier = Modifier.fillMaxWidth().height(56.dp),
                     border = BorderStroke(1.dp, LandingPrimary.copy(alpha = 0.2f)),
                     colors = ButtonDefaults.outlinedButtonColors(contentColor = LandingPrimary),
@@ -266,6 +267,14 @@ fun LandingTerminalCard(
                     Icon(Icons.Default.CellTower, contentDescription = null, modifier = Modifier.size(16.dp))
                     Spacer(Modifier.width(8.dp))
                     Text("TEST CONNECTION", fontWeight = FontWeight.Bold)
+                }
+
+                if (hasInvalidApiKeyChars(state.apiKey)) {
+                    Text(
+                        "API key cannot contain line breaks",
+                        color = LandingError,
+                        fontSize = 12.sp
+                    )
                 }
 
                 state.error?.let {
@@ -281,4 +290,8 @@ fun isValidIP(ip: String): Boolean {
         "^((25[0-5]|2[0-4]\\d|1\\d\\d|[1-9]?\\d)(\\.|$)){4}$"
     )
     return regex.matches(ip)
+}
+
+fun hasInvalidApiKeyChars(apiKey: String): Boolean {
+    return apiKey.contains("\n") || apiKey.contains("\r")
 }
