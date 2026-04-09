@@ -25,6 +25,7 @@ import com.thehalotech.nasspectra.feature_dashboard.presentation.ui.components.K
 import com.thehalotech.nasspectra.feature_dashboard.presentation.ui.components.TopBar
 import com.thehalotech.nasspectra.feature_dashboard.presentation.ui.dashboard.DashboardScreen
 import com.thehalotech.nasspectra.feature_dashboard.presentation.ui.storage.StorageScreen
+import com.thehalotech.nasspectra.feature_dashboard.presentation.ui.systems.SystemsScreen
 import com.thehalotech.nasspectra.feature_dashboard.presentation.viewmodel.DashboardViewModel
 import com.thehalotech.nasspectra.feature_dashboard.presentation.viewmodel.MainViewModel
 
@@ -61,6 +62,7 @@ fun MainScreen(viewModel: MainViewModel = hiltViewModel()) {
                 0 -> DashboardScreen()
                 1 -> StorageScreen()
                 2 -> AppScreen()
+                3 -> SystemsScreen()
             }
 
         }

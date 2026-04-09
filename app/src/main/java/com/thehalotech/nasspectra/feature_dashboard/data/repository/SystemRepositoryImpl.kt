@@ -64,9 +64,8 @@ class SystemRepositoryImpl @Inject constructor(
 
     override suspend fun getAppDetails(): List<AppInfo> {
         val response = api.getAppDetails()
-
-        Log.i("AYUSH APP SCREEN:: " ,response.toString())
         return response.map { it.toDomain() }
     }
+
 
 }

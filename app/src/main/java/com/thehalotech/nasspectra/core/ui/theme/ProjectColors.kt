@@ -47,3 +47,12 @@ val Accent    = Color(0xFF00E5FF)
 val AccentSoft= Color(0xFF81ECFF)
 val Warning   = Color(0xFFFFAB40)
 val Critical  = Color(0xFFFF5252)
+
+// --- LANDING THEME COLORS ---
+val LandingBackground = Color(0xFF0A0E14)
+val LandingPrimary = Color(0xFF81ECFF)
+val LandingSurface = Color(0xFF151A21)
+val LandingSurfaceVariant = Color(0xFF20262F)
+val LandingError = Color(0xFFFF716C)
+val LandingTertiary = Color(0xFF8EFF71)
+val LandingOutline = Color(0xFF44484F)

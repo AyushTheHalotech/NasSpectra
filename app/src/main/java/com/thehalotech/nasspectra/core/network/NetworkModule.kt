@@ -1,6 +1,5 @@
 package com.thehalotech.nasspectra.core.network
 
-import com.thehalotech.nasspectra.BuildConfig
 import com.thehalotech.nasspectra.feature_dashboard.data.remote.SystemApi
 import dagger.Module
 import dagger.Provides
@@ -16,14 +15,15 @@ import retrofit2.converter.gson.GsonConverterFactory
 @InstallIn(SingletonComponent::class)
 object NetworkModule {
 
-    private const val BASE_URL = BuildConfig.BASE_URL
-    private const val API_KEY = BuildConfig.TRUENAS_API_KEY
-
     @Provides
     @Singleton
-    fun provideOkHttpClient(): OkHttpClient {
+    fun provideOkHttpClient(
+        baseUrlInterceptor: BaseUrlInterceptor,
+        authInterceptor: AuthInterceptor
+    ): OkHttpClient {
         return OkHttpClient.Builder()
-            .addInterceptor(AuthInterceptor(API_KEY))
+            .addInterceptor(baseUrlInterceptor)
+            .addInterceptor(authInterceptor)
             .addInterceptor(HttpLoggingInterceptor().apply {
                 level = HttpLoggingInterceptor.Level.BODY
             })
@@ -34,7 +34,7 @@ object NetworkModule {
     @Singleton
     fun provideRetrofit(client: OkHttpClient): Retrofit {
         return Retrofit.Builder()
-            .baseUrl(BASE_URL)
+            .baseUrl("http://placeholder/") //dummy
             .client(client)
             .addConverterFactory(GsonConverterFactory.create())
             .build()

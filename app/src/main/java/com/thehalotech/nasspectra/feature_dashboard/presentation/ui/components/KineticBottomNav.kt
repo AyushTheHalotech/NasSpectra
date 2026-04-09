@@ -35,7 +35,7 @@ fun KineticBottomNav(selected: Int, onSelect: (Int) -> Unit) {
         Pair("Overview", SystemIcon.DASHBOARD),
         Pair("Storage",  SystemIcon.STORAGE),
         Pair("Apps",  SystemIcon.APPS),
-        Pair("Thermal",  SystemIcon.TEMPERATURE),
+        Pair("Systems",  SystemIcon.CPU),
     )
     Box(
         Modifier

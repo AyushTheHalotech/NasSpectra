@@ -16,14 +16,14 @@ NasSpectra is a professional, high-performance Android application designed spec
 <div align="center">
   <table>
     <tr>
+      <td align="center"><b>Access Terminal</b></td>
       <td align="center"><b>Dashboard</b></td>
       <td align="center"><b>App Management</b></td>
-      <td align="center"><b>Storage Management</b></td>
     </tr>
     <tr>
+      <td><img src="screenshots/accessterminal.png" width="300" alt="Access Terminal"></td>
       <td><img src="screenshots/dashboard.png" width="300" alt="Dashboard"></td>
       <td><img src="screenshots/apps.png" width="300" alt="App Management"></td>
-      <td><img src="screenshots/storage.png" width="300" alt="App Management"></td>
     </tr>
   </table>
 </div>
@@ -32,6 +32,7 @@ NasSpectra is a professional, high-performance Android application designed spec
 
 ## ✨ Key Features
 
+- 🖥️ **Secure Access Terminal**: Centralized authentication gateway for establishing secure uplinks to your TrueNAS server.
 - 📊 **System Monitoring**: Track real-time CPU usage and RAM utilization with high-precision gauge components.
 - 🌐 **Network Insights**: Monitor network interface states, link speeds, and IP configurations at a glance.
 - 📂 **Storage Health**: Comprehensive overview of ZFS pools, including health status, allocated space, and total capacity.
@@ -48,7 +49,7 @@ The project is architected using **Clean Architecture** principles combined with
 ### 📐 Layered Structure
 - **Presentation Layer**: Built with **Jetpack Compose**, utilizing unidirectional data flow (UDF) for a predictable and reactive UI state.
 - **Domain Layer**: The heart of the application. Contains pure Kotlin business logic, including `UseCases`, domain `Models`, and `Repository` interfaces.
-- **Data Layer**: Handles all data operations. Implements repository interfaces by orchestrating data from the TrueNAS REST API via **Retrofit**.
+- **Data Layer**: Handles all data operations. Implements repository interfaces by orchestrating data from the TrueNAS REST API via **Retrofit**, with local persistence managed by **Jetpack DataStore**.
 
 ---
 
@@ -58,6 +59,7 @@ The project is architected using **Clean Architecture** principles combined with
 - **UI Framework**: [Jetpack Compose](https://developer.android.com/jetpack/compose)
 - **Dependency Injection**: [Hilt](https://developer.android.com/training/dependency-injection/hilt-android) (Dagger)
 - **Networking**: [Retrofit](https://square.github.io/retrofit/) & [OkHttp](https://square.github.io/okhttp/)
+- **Local Persistence**: [Jetpack DataStore](https://developer.android.com/topic/libraries/architecture/datastore) (Preferences)
 - **Image Loading**: [Coil](https://coil-kt.github.io/coil/)
 - **Architecture**: ViewModel, Lifecycle, Navigation Compose
 - **Design System**: Material Design 3 (M3)
@@ -72,8 +74,11 @@ The project is architected using **Clean Architecture** principles combined with
    ```
 2. **Open in Android Studio**
    Open the root project folder in the latest stable version of Android Studio.
-3. **Configure API**
-   Ensure your TrueNAS API credentials/endpoint are correctly configured in the data source.
+3. **Establish System Uplink**
+   - Launch the application and navigate to the **Access Terminal**.
+   - **Authentication**: Input your TrueNAS server's **IP Address** and your generated **API Key** (Encryption Key).
+   - **Verification**: Tap **Test Connection** to validate the credentials and server availability.
+   - **Access**: Once the status indicator turns green (`CONNECTED`), tap **Next** to proceed to the main dashboard.
 4. **Build & Run**
    Sync Gradle and deploy the `:app` module to your device or emulator.
 
@@ -86,7 +91,7 @@ com.thehalotech.nasspectra
 ├── application      # Hilt Application class and global DI Modules
 ├── core             # Shared components: UI themes, design system, and network core
 └── feature_dashboard
-    ├── data         # API definitions, DTOs, and Repository implementations
+    ├── data         # API definitions, DTOs, Repository implementations, and DataStore
     ├── domain       # Business logic: UseCases and Domain Models
     └── presentation # UI: ViewModels, Screens, and Compose Components
 ```

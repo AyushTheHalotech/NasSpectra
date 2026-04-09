@@ -1,20 +1,9 @@
-import java.util.Properties
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.compose)
     alias(libs.plugins.hilt)
     alias(libs.plugins.google.devtools.ksp)
 }
-
-val localProperties = Properties()
-val localPropertiesFile: File? = rootProject.file("local.properties")
-
-if (localPropertiesFile?.exists() ?: false) {
-    localProperties.load(localPropertiesFile.inputStream())
-}
-
-val trueNasApiKey = localProperties.getProperty("TRUENAS_API_KEY") ?: ""
-val baseUrl = localProperties.getProperty("BASE_URL") ?: ""
 
 android {
     namespace = "com.thehalotech.nasspectra"
@@ -26,16 +15,6 @@ android {
         targetSdk = 36
         versionCode = 1
         versionName = "1.0"
-        buildConfigField(
-            "String",
-            "TRUENAS_API_KEY",
-            "\"$trueNasApiKey\""
-        )
-        buildConfigField(
-            "String",
-            "BASE_URL",
-            "\"$baseUrl\""
-        )
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
@@ -56,7 +35,6 @@ android {
     }
     buildFeatures {
         compose = true
-        buildConfig = true
     }
 }
 
@@ -94,5 +72,10 @@ dependencies {
     implementation("io.coil-kt.coil3:coil-compose:3.4.0")
     implementation("io.coil-kt.coil3:coil-network-okhttp:3.4.0")
     implementation("io.coil-kt.coil3:coil-svg:3.4.0")
+
+    implementation("androidx.datastore:datastore-preferences:1.2.1")
+
+    implementation("androidx.navigation:navigation-compose:2.9.7")
+    implementation("androidx.compose.animation:animation:1.10.6")
 
 }
