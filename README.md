@@ -99,5 +99,5 @@ com.thehalotech.nasspectra
 ---
 
 <p align="center">
-  <i>Developed with ❤️ by <b>TheHaloTech</b></i>
+  <i>Developed with ❤️ by <b>AJDevLabs</b></i>
 </p>
